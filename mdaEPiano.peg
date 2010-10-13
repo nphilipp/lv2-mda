@@ -1,0 +1,35 @@
+#ifndef mdaEPiano_peg
+#define mdaEPiano_peg
+
+
+#ifndef PEG_STRUCT
+#define PEG_STRUCT
+typedef struct {
+  float min;
+  float max;
+  float default_value;
+  char toggled;
+  char integer;
+  char logarithmic;
+} peg_data_t;
+#endif
+
+/* <http://rekado.wurmus.de/lv2/mdaEPiano> */
+
+static const char p_uri[] = "http://rekado.wurmus.de/lv2/mdaEPiano";
+
+enum p_port_enum {
+  p_midi,
+  p_left,
+  p_right,
+  p_n_ports
+};
+
+static const peg_data_t p_ports[] = {
+  { -3.40282e+38, 3.40282e+38, -3.40282e+38, 0, 0, 0 }, 
+  { -3.40282e+38, 3.40282e+38, -3.40282e+38, 0, 0, 0 }, 
+  { -3.40282e+38, 3.40282e+38, -3.40282e+38, 0, 0, 0 }, 
+};
+
+
+#endif /* mdaEPiano_peg */
