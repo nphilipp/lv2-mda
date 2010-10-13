@@ -1,6 +1,6 @@
-==================================================
+===========================================================
 Native LV2 port of the famous mdaEPiano VSTi
-==================================================
+===========================================================
 
 Port
 	Author:			Ricardo Wurmus (rekado)
@@ -8,10 +8,9 @@ Port
  	Latest change:	Wed Oct 13, 2010
 
 mdaEPiano
-	Author:			Paul Kellett
-					paul.kellett@mda-vst.com
+	Author:			Paul Kellett (paul.kellett@mda-vst.com)
 
-==================================================
+===========================================================
 
 --[ ABOUT
 

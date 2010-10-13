@@ -23,32 +23,25 @@
 
 /* TODO:
  * - tuning is off when rate is not 44100
- * - notes sometimes hang, sometimes there is clicking
+ * - retriggering sustained notes just sounds wrong and clicky
+ * - notes hang when playing a note in quick succession (find_free_voice)
  * - has become a little less responsive (probably because of find_free_voice)
  */
 
 
 class mdaEPianoVoice : public LV2::Voice {
-	//TODO: change back to private after setting up set/get functions
-	//private:
-	public:
+	private:
 		float Fs, iFs;
 
 		///global internal variables
 		KGRP  kgrp[34];
-		short *waves;
+		short *waves, sustain;
 		float width;
-		long size, sustain;
+		long size;
 		float lfo0, lfo1, dlfo, lmod, rmod;
 		float treb, tfrq, tl, tr;
 		float tune, fine, random, stretch, overdrive;
-		float muff, muffvel, sizevel, velsens, volume, modwhl;
-
-	protected:
-		unsigned char m_key;
-
-	public:
-		float param[NPARAMS]; //pointer to the parent's current parameters
+		float muff, muffvel, sizevel, velsens, volume;
 
 		//begin --- from VOICE
 		long  delta;  //sample playback
@@ -69,16 +62,14 @@ class mdaEPianoVoice : public LV2::Voice {
 		unsigned short note; //remember what note triggered this
 		//end --- from VOICE
 
+		float param[NPARAMS];
+
+	protected:
+		unsigned char m_key;
+
+	public:
 		mdaEPianoVoice(double rate)
 			: m_key(LV2::INVALID_KEY) {
-
-				//license notice
-				std::cout << "lv2-mdaEPiano v.0.0.1, Copyright (c) 2010 Ricardo Wurmus" << std::endl;
-				std::cout << "port of mdaEPiano, Copyright (c) 2008 Paul Kellett" << std::endl;
-				std::cout << "This is free software, and you are welcome to redistribute it" << std::endl;
-				std::cout << "under certain conditions; see LICENSE file for details." << std::endl;
-				std::cout << std::endl;
-
 				//set tuning
 				Fs = 44100.0f; //rate; //TODO
 				iFs = 1.0f/Fs;
@@ -170,6 +161,14 @@ class mdaEPianoVoice : public LV2::Voice {
 				param[i] = p[i];
 			//memcpy(param, p, sizeof(p)); 
 		}
+
+		//set functions
+		void set_sustain(unsigned short v) 	{ sustain = v; }
+		void set_volume(float v)		 	{ volume = v; }
+		void set_dec(float v) 				{ dec = v; }
+		void set_muff(float v) 				{ muff = v; }
+		void set_lmod(float v) 				{ lmod = v; }
+		void set_rmod(float v) 				{ rmod = v; }
 
 		void update()
 		{
@@ -346,12 +345,26 @@ class mdaEPianoVoice : public LV2::Voice {
 class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 	public:
 		uint32_t curProgram;
+		bool sustain;
+		float modwhl;
+
 		//container for all voices
 		mdaEPianoVoice *voices[NVOICES];
 		mdaEPianoProgram programs[NPROGS];
 
 		mdaEPiano(double rate)
 			: LV2::Synth<mdaEPianoVoice, mdaEPiano>(p_n_ports, p_midi) {
+
+				//license notice
+				std::cout << std::endl;
+				std::cout << "lv2-mdaEPiano v.0.0.1, Copyright (c) 2010 Ricardo Wurmus" << std::endl;
+				std::cout << "    port of mdaEPiano, Copyright (c) 2008 Paul Kellett" << std::endl;
+				std::cout << "This is free software, and you are welcome to redistribute it" << std::endl;
+				std::cout << "under certain conditions; see LICENSE file for details." << std::endl;
+				std::cout << std::endl;
+
+				//init global variables
+				sustain = 0;
 
 				if(programs)
 				{
@@ -384,23 +397,28 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 			}
 
 		unsigned find_free_voice(unsigned char key, unsigned char velocity) {
-			//TODO: for performance reasons introduce a synth-wide sustain variable
 			//is this a retriggered note during sustain?
-			for (unsigned i = 0; i < NVOICES; ++i) {
-				if ((voices[i]->get_key() == key) && (voices[i]->is_sustained()))
-					return i;
-			}
-			
-			//otherwise just take the next free voice
-			for (unsigned i = 0; i < NVOICES; ++i) {
-				if (voices[i]->get_key() == LV2::INVALID_KEY)
-				{
-					//TODO: LPF is not used anyway
-					//initialize LPF
-					//voices[i]->f0 = voices[i]->f1 = 0.0f;
+			if (sustain) {
+				for (unsigned i = 0; i < NVOICES; ++i) {
+					if ((voices[i]->get_key() == key) && (voices[i]->is_sustained()))
+					{
+						std::cout << "reusing old voice: " << i << std::endl;
+						return i;
+					}
+				}
+			} else {
+				//otherwise just take the next free voice
+				for (unsigned i = 0; i < NVOICES; ++i) {
+					if (voices[i]->get_key() == LV2::INVALID_KEY)
+					{
+						//TODO: LPF is not used anyway
+						//initialize LPF
+						//voices[i]->f0 = voices[i]->f1 = 0.0f;
 
-					//return voice's index
-					return i;
+						//return voice's index
+						std::cout << "taking new voice: " << i << std::endl;
+						return i;
+					}
 				}
 			}
 
@@ -453,13 +471,17 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 							if (size != 3)
 								return;
 
-							for (unsigned i = 0; i < NVOICES; ++i) {
-								//scale the mod value to cover the range [0..0.9906]
-								voices[i]->modwhl = 0.0078f * (float)(data[2]);
-								if(voices[i]->modwhl > 0.05f) //over-ride pan/trem depth
-								{
-									voices[i]->rmod = voices[i]->lmod = voices[i]->modwhl; //lfo depth
-									if(programs[curProgram].param[4] < 0.5f) voices[i]->rmod = -voices[i]->rmod;
+							//scale the mod value to cover the range [0..0.9906]
+							modwhl = 0.0078f * (float)(data[2]);
+							if(modwhl > 0.05f) //over-ride pan/trem depth
+							{
+								for (unsigned i = 0; i < NVOICES; ++i) {
+									//set lfo depth
+									voices[i]->set_lmod(modwhl);
+									if(programs[curProgram].param[4] < 0.5f)
+										voices[i]->set_rmod(-modwhl);
+									else
+										voices[i]->set_rmod(-modwhl);
 								}
 							}
 							break;
@@ -471,9 +493,7 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 								return;
 
 							std::cout << "EVENT: volume" << std::endl;
-							/*
-							   volume = 0.00002f * (float)(data[2] * data[2]);
-							   */
+							setVolume(0.00002f * (float)(data[2] * data[2]));
 							break;
 
 							//sustain pedal
@@ -485,9 +505,10 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 								return;
 
 							{
-								unsigned short sustain = data[2] & 0x40;
+								sustain = data[2] & 0x40;
+
 								for (unsigned i = 0; i < NVOICES; ++i) {
-									voices[i]->sustain = sustain;
+									voices[i]->set_sustain(sustain);
 									//if pedal was released: dampen sustained notes
 									if((sustain==0) && (voices[i]->is_sustained()))
 										voices[i]->off(0);
@@ -501,9 +522,9 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 							{  
 								for(short v=0; v<NVOICES; v++)
 								{
-									voices[v]->dec=0.99f;
-									voices[v]->sustain = 0;
-									voices[v]->muff = 160.0f;
+									voices[v]->set_dec(0.99f);
+									voices[v]->set_sustain(0);
+									voices[v]->set_muff(160.0f);
 								}
 							}
 							break;
@@ -517,6 +538,12 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 
 				default: break;
 			}
+		}
+
+		void setVolume(unsigned char value)
+		{
+			for (uint32_t v=0; v<NVOICES; ++v)
+				voices[v]->set_volume(value);
 		}
 
 		void setProgram(uint32_t program)
@@ -557,10 +584,6 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 			programs[p].param[9] = p9;
 			programs[p].param[10] = p10;
 			programs[p].param[11] = p11;
-		}
-
-		void selectProgram()
-		{
 		}
 };
 
