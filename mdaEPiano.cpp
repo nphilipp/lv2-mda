@@ -24,8 +24,6 @@
 /* TODO:
  * - tuning is off when rate is not 44100
  * - retriggering sustained notes just sounds wrong and clicky
- * - notes hang when playing a note in quick succession (find_free_voice)
- * - has become a little less responsive (probably because of find_free_voice)
  */
 
 
@@ -200,7 +198,7 @@ class mdaEPianoVoice : public LV2::Voice {
 			float l=99.0f;
 			long k, s;
 
-			// initialize the LPF
+			// initialize the LPF (which doesn't seem to be used)
 			f0 = f1 = 0.0f;
 
 			// TODO: some keyboards send note off events as 'note on \w velocity 0'
@@ -263,20 +261,16 @@ class mdaEPianoVoice : public LV2::Voice {
 			} else {
 				note = SUSTAIN;
 			}
-			// m_key is set to INVALID_KEY in render when env < SILENCE
+
+			//Mark the voice to be turned off later. It may not be set to
+			//INVALID_KEY yet, because the release sound still needs to be
+			//rendered.  m_key is finally set to INVALID_KEY by 'render' when
+			//env < SILENCE
+			m_key = SUSTAIN;
 		}
 
-		bool is_sustained()
-		{
-			if (note == SUSTAIN)
-				return true;
-			return false;
-		}
-
-		unsigned char get_key() const
-		{ 
-			return m_key; 
-		}
+		bool is_sustained() { return (note == SUSTAIN); }
+		unsigned char get_key() const { return m_key; }
 
 		// generates the sound for this voice
 		void render(uint32_t from, uint32_t to) 
@@ -332,9 +326,7 @@ class mdaEPianoVoice : public LV2::Voice {
 
 			// turn off further processing when the envelope has rendered the voice silent
 			if (env < SILENCE)
-			{
 				m_key = LV2::INVALID_KEY;
-			}
 
 			if(fabs(tl)<1.0e-10) tl = 0.0f; //anti-denormal
 			if(fabs(tr)<1.0e-10) tr = 0.0f;
@@ -401,24 +393,22 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 			if (sustain) {
 				for (unsigned i = 0; i < NVOICES; ++i) {
 					if ((voices[i]->get_key() == key) && (voices[i]->is_sustained()))
-					{
-						std::cout << "reusing old voice: " << i << std::endl;
 						return i;
-					}
 				}
-			} else {
-				//otherwise just take the next free voice
-				for (unsigned i = 0; i < NVOICES; ++i) {
-					if (voices[i]->get_key() == LV2::INVALID_KEY)
-					{
-						//TODO: LPF is not used anyway
-						//initialize LPF
-						//voices[i]->f0 = voices[i]->f1 = 0.0f;
+			} 
 
-						//return voice's index
-						std::cout << "taking new voice: " << i << std::endl;
-						return i;
-					}
+			//take the next free voice if
+			// ... notes are sustained but not this new one
+			// ... notes are not sustained
+			for (unsigned i = 0; i < NVOICES; ++i) {
+				if (voices[i]->get_key() == LV2::INVALID_KEY)
+				{
+					//TODO: LPF is not used anyway
+					//initialize LPF
+					//voices[i]->f0 = voices[i]->f1 = 0.0f;
+
+					//return voice's index
+					return i;
 				}
 			}
 
@@ -455,7 +445,6 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 						if (size != 3)
 							return;
 
-						//if there is a voice with the same note: take it
 						unsigned int v = find_free_voice(data[1], data[2]);
 						if (v < NVOICES)
 							voices[v]->on(data[1], data[2]);
@@ -492,7 +481,6 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 							if (size != 3)
 								return;
 
-							std::cout << "EVENT: volume" << std::endl;
 							setVolume(0.00002f * (float)(data[2] * data[2]));
 							break;
 
