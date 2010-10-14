@@ -49,8 +49,6 @@ At least this is what I do on my system.
 
 --[ KNOWN ISSUES
 
-The following problems are known and will be addressed with later commits
-	- When playing fast, sometimes a note will hang.
-	- The responsiveness is less than perfect; will have to optimize the code again.
+The following problem is known and will be addressed with later commits
 	- The tuning is off when the host runs at a sampling frequency unequal to 44.1kHz
 
