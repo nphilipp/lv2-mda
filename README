@@ -44,11 +44,11 @@ don't forget to connect the plugin's stereo output to your system's outputs:
 	jack_connect system:playback_1 mdaEPiano:left
 	jack_connect system:playback_2 mdaEPiano:right
 
-At least this is what I do on my system.
+At least this is what I do on my system. I provide a simple connect script with the code which does these things automatically.
 
 
 --[ KNOWN ISSUES
-
-The following problem is known and will be addressed with later commits
-	- The tuning is off when the host runs at a sampling frequency unequal to 44.1kHz
-
+None. Only missing features:
+	- proper note stealing as in the original
+	- GUI
+	- saving and importing of presets
