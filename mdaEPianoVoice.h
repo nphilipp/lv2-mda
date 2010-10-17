@@ -2,15 +2,8 @@
 #define MDA_EPIANO_VOICE_H
 
 #include "mdaEPianoCommon.h"
-//#include "mdaEPianoData.h"
 #include <lv2synth.hpp>
 #include "mdaEPiano.peg"
-
-
-/* TODO:
- * - tuning is off when rate is not 44100
- * - retriggering sustained notes just sounds wrong and clicky
- */
 
 struct KGRP  //keygroup
 {

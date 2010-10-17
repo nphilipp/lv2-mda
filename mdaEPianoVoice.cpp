@@ -15,18 +15,18 @@
  */
 
 #include "mdaEPianoVoice.h"
+#include <iostream>
 
 /* TODO:
  * - tuning is off when rate is not 44100
- * - retriggering sustained notes just sounds wrong and clicky
  */
 
 
 mdaEPianoVoice::mdaEPianoVoice(double rate)
 	: m_key(LV2::INVALID_KEY) {
 		//set tuning
-		//Fs = 44100.0f; //rate; //TODO
-		Fs = 48000.0f;
+		//Fs = 48000.0f;
+		Fs = rate;
 		iFs = 1.0f/Fs;
 
 		//load sample data (maximum value seems to be -24284)
