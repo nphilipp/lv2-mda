@@ -46,8 +46,6 @@ mdaEPiano::mdaEPiano(double rate)
 		mdaEPiano::controllers[random_tuning_param] 	= 0x2B;
 		mdaEPiano::controllers[overdrive_param] 		= 0x08;
 
-		outputControllerMapping();
-
 		if(programs)
 		{
 			//fill patches...
@@ -141,12 +139,6 @@ void mdaEPiano::update() //parameter change
 	for (uint32_t v=0; v<NVOICES; ++v)
 		voices[v]->update();
 }
-void mdaEPiano::outputControllerMapping()
-{
-	for (unsigned char a=0; a<NPARAMS; ++a)
-		printf("%d: %X\n", a, mdaEPiano::controllers[a]);
-	printf("\n");
-}
 
 void mdaEPiano::fillpatch(uint32_t p, const char *name, float p0, float p1,
 		float p2, float p3,
@@ -173,10 +165,6 @@ void mdaEPiano::fillpatch(uint32_t p, const char *name, float p0, float p1,
 }
 
 void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
-	for (unsigned char b=0; b<size; ++b)
-		printf("%d: %X | ", b, data[b]);
-	printf("\n");
-
 	//discard invalid midi messages
 	if (size < 2)
 		return;

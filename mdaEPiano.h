@@ -33,8 +33,6 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
 		void setParameter(unsigned char id, float value);
 		void setProgram(uint32_t program);
 
-		void outputControllerMapping(void);
-
 		//parameter change
 		void update(void);
 		void fillpatch(uint32_t p, const char *name, float p0, float p1,
