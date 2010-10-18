@@ -17,15 +17,9 @@
 #include "mdaEPianoVoice.h"
 #include <iostream>
 
-/* TODO:
- * - tuning is off when rate is not 44100
- */
-
-
 mdaEPianoVoice::mdaEPianoVoice(double rate)
 	: m_key(LV2::INVALID_KEY) {
 		//set tuning
-		//Fs = 48000.0f;
 		Fs = rate;
 		iFs = 1.0f/Fs;
 
@@ -127,24 +121,24 @@ void mdaEPianoVoice::set_rmod(float v) 				{ rmod = v; }
 
 void mdaEPianoVoice::update()
 {
-	size = (long)(12.0f * param[2] - 6.0f);
-	treb = 4.0f * param[3] * param[3] - 1.0f; //treble gain
-	if(param[3] > 0.5f) tfrq = 14000.0f; else tfrq = 5000.0f; //treble freq
+	size = (long)(12.0f * param[hardness_param] - 6.0f);
+	treb = 4.0f * param[treble_boost_param] * param[treble_boost_param] - 1.0f; //treble gain
+	if(param[treble_boost_param] > 0.5f) tfrq = 14000.0f; else tfrq = 5000.0f; //treble freq
 	tfrq = 1.0f - (float)exp(-iFs * tfrq);
 
-	rmod = lmod = param[4] + param[4] - 1.0f; //lfo depth
-	if(param[4] < 0.5f) rmod = -rmod;
-	dlfo = 6.283f * iFs * (float)exp(6.22f * param[5] - 2.61f); //lfo rate
+	rmod = lmod = param[mod_param] + param[mod_param] - 1.0f; //lfo depth
+	if(param[mod_param] < 0.5f) rmod = -rmod;
+	dlfo = 6.283f * iFs * (float)exp(6.22f * param[lfo_rate_param] - 2.61f); //lfo rate
 
-	velsens = 1.0f + param[6] + param[6];
-	if(param[6] < 0.25f) velsens -= 0.75f - 3.0f * param[6];
+	velsens = 1.0f + param[velosense_param] + param[velosense_param];
+	if(param[velosense_param] < 0.25f) velsens -= 0.75f - 3.0f * param[velosense_param];
 
-	width = 0.03f * param[7];
-	//poly = 1 + (long)(31.9f * param[8]);
-	fine = param[9] - 0.5f;
-	random = 0.077f * param[10] * param[10];
-	stretch = 0.0f; //0.000434f * (param[11] - 0.5f); parameter re-used for overdrive!
-	overdrive = 1.8f * param[11];
+	width = 0.03f * param[stereo_width_param];
+	//poly = 1 + (long)(31.9f * param[polyphony_param]);
+	fine = param[fine_tuning_param] - 0.5f;
+	random = 0.077f * param[random_tuning_param] * param[random_tuning_param];
+	stretch = 0.0f; //0.000434f * (param[overdrive_param] - 0.5f); parameter re-used for overdrive!
+	overdrive = 1.8f * param[overdrive_param];
 }
 
 void mdaEPianoVoice::on(unsigned char key, unsigned char velocity) { 
@@ -185,7 +179,7 @@ void mdaEPianoVoice::on(unsigned char key, unsigned char velocity) {
 
 		if(key > 60) env *= (float)exp(0.01f * (float)(60 - key)); //new! high notes quieter
 
-		l = 50.0f + param[4] * param[4] * muff + muffvel * (float)(velocity - 64); //muffle
+		l = 50.0f + param[mod_param] * param[mod_param] * muff + muffvel * (float)(velocity - 64); //muffle
 		if(l < (55.0f + 0.4f * (float)key)) l = 55.0f + 0.4f * (float)key;
 		if(l > 210.0f) l = 210.0f;
 		ff = l * l * iFs;
@@ -199,12 +193,12 @@ void mdaEPianoVoice::on(unsigned char key, unsigned char velocity) {
 		outl = l + l - outr;
 
 		if(key < 44) key = 44; //limit max decay length
-		dec = (float)exp(-iFs * exp(-1.0 + 0.03 * (double)key - 2.0f * param[0]));
+		dec = (float)exp(-iFs * exp(-1.0 + 0.03 * (double)key - 2.0f * param[envelope_decay_param]));
 	}
 	/*
 	   else { //note off
 	   if(sustain==0) {
-	   dec = (float)exp(-iFs * exp(6.0 + 0.01 * (double)note - 5.0 * param[1]));
+	   dec = (float)exp(-iFs * exp(6.0 + 0.01 * (double)note - 5.0 * param[envelope_release_param]));
 	   } else {
 	   note = SUSTAIN;
 	   }
@@ -214,7 +208,7 @@ void mdaEPianoVoice::on(unsigned char key, unsigned char velocity) {
 
 void mdaEPianoVoice::off(unsigned char velocity) { 
 	if(sustain==0) {
-		dec = (float)exp(-iFs * exp(6.0 + 0.01 * (double)note - 5.0 * param[1]));
+		dec = (float)exp(-iFs * exp(6.0 + 0.01 * (double)note - 5.0 * param[envelope_release_param]));
 	} else {
 		note = SUSTAIN;
 	}

@@ -32,15 +32,26 @@ mdaEPiano::mdaEPiano(double rate)
 		sustain = 0;
 		curProgram = 0;
 
+		// set up default controllers
+		mdaEPiano::controllers[envelope_decay_param] 	= 0x49;
+		mdaEPiano::controllers[envelope_release_param] 	= 0x24;
+		mdaEPiano::controllers[hardness_param] 			= 0x25;
+		mdaEPiano::controllers[treble_boost_param] 		= 0x48;
+		mdaEPiano::controllers[mod_param] 				= 0x26;
+		mdaEPiano::controllers[lfo_rate_param] 			= 0x27;
+		mdaEPiano::controllers[velosense_param] 		= 0x28;
+		mdaEPiano::controllers[stereo_width_param] 		= 0x29;
+		mdaEPiano::controllers[polyphony_param] 		= 0x4A;
+		mdaEPiano::controllers[fine_tuning_param] 		= 0x2A;
+		mdaEPiano::controllers[random_tuning_param] 	= 0x2B;
+		mdaEPiano::controllers[overdrive_param] 		= 0x08;
+
+		outputControllerMapping();
+
 		if(programs)
 		{
 			//fill patches...
 			uint32_t i=0;
-			/* param[0] -
-			 * param[1] -
-			 * ...
-			 * param[11] - overdrive
-			 */
 			fillpatch(i++, "Default", 0.500f, 0.500f, 0.500f, 0.500f, 0.500f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.146f, 0.000f);
 			fillpatch(i++, "Bright", 0.500f, 0.500f, 1.000f, 0.800f, 0.500f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.146f, 0.500f);
 			fillpatch(i++, "Mellow", 0.500f, 0.500f, 0.000f, 0.000f, 0.500f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.246f, 0.000f);
@@ -61,6 +72,16 @@ mdaEPiano::mdaEPiano(double rate)
 		add_audio_outputs(p_left, p_right);
 		setProgram(0);
 	}
+
+signed char mdaEPiano::get_param_id_from_controller(unsigned char cc)
+{
+	for(unsigned char i=0; i<NPARAMS; ++i)
+	{
+		if (cc == controllers[i])
+			return i;
+	}
+	return -1;
+}
 
 unsigned mdaEPiano::find_free_voice(unsigned char key, unsigned char velocity) {
 	//is this a retriggered note during sustain?
@@ -90,10 +111,20 @@ unsigned mdaEPiano::find_free_voice(unsigned char key, unsigned char velocity) {
 	return 0;
 }
 
-void mdaEPiano::setVolume(unsigned char value)
+void mdaEPiano::setVolume(float value)
 {
 	for (uint32_t v=0; v<NVOICES; ++v)
 		voices[v]->set_volume(value);
+}
+
+void mdaEPiano::setParameter(unsigned char id, float value)
+{
+	if(id>=NPARAMS) 
+		return;
+
+	programs[curProgram].param[id] = value;
+	setProgram(curProgram); //update all voices
+	printf("changed %i to %f\n", id, value);
 }
 
 void mdaEPiano::setProgram(uint32_t program)
@@ -110,6 +141,12 @@ void mdaEPiano::update() //parameter change
 	for (uint32_t v=0; v<NVOICES; ++v)
 		voices[v]->update();
 }
+void mdaEPiano::outputControllerMapping()
+{
+	for (unsigned char a=0; a<NPARAMS; ++a)
+		printf("%d: %X\n", a, mdaEPiano::controllers[a]);
+	printf("\n");
+}
 
 void mdaEPiano::fillpatch(uint32_t p, const char *name, float p0, float p1,
 		float p2, float p3,
@@ -121,21 +158,25 @@ void mdaEPiano::fillpatch(uint32_t p, const char *name, float p0, float p1,
 	//TODO: better use strncopy (first learn how)
 	//strncpy(programs[p].name, name, 50);
 	strcpy(programs[p].name, name);
-	programs[p].param[0] = p0;
-	programs[p].param[1] = p1;
-	programs[p].param[2] = p2;
-	programs[p].param[3] = p3;
-	programs[p].param[4] = p4;
-	programs[p].param[5] = p5;
-	programs[p].param[6] = p6;
-	programs[p].param[7] = p7;
-	programs[p].param[8] = p8;
-	programs[p].param[9] = p9;
-	programs[p].param[10] = p10;
-	programs[p].param[11] = p11;
+	programs[p].param[envelope_decay_param] = p0;
+	programs[p].param[envelope_release_param] = p1;
+	programs[p].param[hardness_param] = p2;
+	programs[p].param[treble_boost_param] = p3;
+	programs[p].param[mod_param] = p4;
+	programs[p].param[lfo_rate_param] = p5;
+	programs[p].param[velosense_param] = p6;
+	programs[p].param[stereo_width_param] = p7;
+	programs[p].param[polyphony_param] = p8;
+	programs[p].param[fine_tuning_param] = p9;
+	programs[p].param[random_tuning_param] = p10;
+	programs[p].param[overdrive_param] = p11;
 }
 
 void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
+	for (unsigned char b=0; b<size; ++b)
+		printf("%d: %X | ", b, data[b]);
+	printf("\n");
+
 	//discard invalid midi messages
 	if (size < 2)
 		return;
@@ -170,8 +211,25 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 			}
 			break;
 
+		case 0xE0: //pitch bend
+			{
+				//discard invalid midi messages
+				if (size != 3)
+					return;
+				//TODO: change pitch
+			}
+			break;
+
 			//controller
 		case 0xB0:
+			//WIP: control preset parameters with assigned controllers
+			{
+				signed char param_id = -1;
+				param_id = get_param_id_from_controller(data[1]);
+				if(param_id >= 0) setParameter(param_id, scale_midi_to_f(data[2]));
+			}
+
+			// standard controller stuff
 			switch(data[1])
 			{
 				case 0x01: //mod wheel
@@ -179,14 +237,14 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 					if (size != 3)
 						return;
 
-					//scale the mod value to cover the range [0..0.9906]
-					modwhl = 0.0078f * (float)(data[2]);
+					//scale the mod value to cover the range [0..1]
+					modwhl = scale_midi_to_f(data[2]);
 					if(modwhl > 0.05f) //over-ride pan/trem depth
 					{
 						for (unsigned i = 0; i < NVOICES; ++i) {
 							//set lfo depth
 							voices[i]->set_lmod(modwhl);
-							if(programs[curProgram].param[4] < 0.5f)
+							if(programs[curProgram].param[mod_param] < 0.5f)
 								voices[i]->set_rmod(-modwhl);
 							else
 								voices[i]->set_rmod(-modwhl);

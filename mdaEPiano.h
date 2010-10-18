@@ -15,20 +15,25 @@ class mdaEPianoProgram
 };
 
 class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
+	private:
+		unsigned char controllers[NPARAMS]; //controller mapping
 	public:
 		uint32_t curProgram;
 		bool sustain;
 		float modwhl;
 
-		//container for all voices
-		mdaEPianoVoice *voices[NVOICES];
+		mdaEPianoVoice *voices[NVOICES]; //container for all voices
 		mdaEPianoProgram programs[NPROGS];
 
 		mdaEPiano(double rate);
+		signed char get_param_id_from_controller(unsigned char cc);
 		unsigned find_free_voice(unsigned char key, unsigned char velocity);
 		void handle_midi(uint32_t size, unsigned char* data);
-		void setVolume(unsigned char value);
+		void setVolume(float value);
+		void setParameter(unsigned char id, float value);
 		void setProgram(uint32_t program);
+
+		void outputControllerMapping(void);
 
 		//parameter change
 		void update(void);
