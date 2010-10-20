@@ -27,6 +27,20 @@ mdaEPianoVoice::mdaEPianoVoice(double rate)
 		extern short epianoData;
 		waves = &epianoData;
 
+		//default preset
+		default_preset[envelope_decay_param]		= 0.500f;
+		default_preset[envelope_release_param]		= 0.500f;
+		default_preset[hardness_param]				= 0.500f;
+		default_preset[treble_boost_param]			= 0.500f;
+		default_preset[modulation_param]			= 0.500f;
+		default_preset[lfo_rate_param]				= 0.650f;
+		default_preset[velocity_sensitivity_param]	= 0.250f;
+		default_preset[stereo_width_param]			= 0.500f;
+		default_preset[polyphony_param]				= 0.500f;
+		default_preset[fine_tuning_param]			= 0.500f;
+		default_preset[random_tuning_param]			= 0.146f;
+		default_preset[overdrive_param]				= 0.000f;
+
 		//Waveform data and keymapping
 		kgrp[ 0].root = 36;  kgrp[ 0].high = 39; //C1
 		kgrp[ 3].root = 43;  kgrp[ 3].high = 45; //G1
@@ -102,14 +116,30 @@ mdaEPianoVoice::mdaEPianoVoice(double rate)
 		tl = tr = lfo0 = dlfo = 0.0f;
 		lfo1 = 1.0f;
 
-		update();
-	}
+		/*Initialize voice with default values.
+		  Calling update() doesn't work, as it gets values from
+		  the control ports. These are not ready yet during initialization
+		  of the voices. */
 
-void mdaEPianoVoice::setParams(float *p)
-{
-	for(unsigned char i=0; i<NPARAMS; ++i)
-		param[i] = p[i];
-}
+		size = (long)(12.0f * default_preset[hardness_param] - 6.0f);
+		treb = 4.0f * default_preset[treble_boost_param] * default_preset[treble_boost_param] - 1.0f; //treble gain
+		if(default_preset[treble_boost_param] > 0.5f) tfrq = 14000.0f; else tfrq = 5000.0f; //treble freq
+		tfrq = 1.0f - (float)exp(-iFs * tfrq);
+
+		rmod = lmod = 2 * default_preset[modulation_param] - 1.0f; //lfo depth
+		if(default_preset[modulation_param] < 0.5f) rmod = -rmod;
+		dlfo = 6.283f * iFs * (float)exp(6.22f * default_preset[lfo_rate_param] - 2.61f); //lfo rate
+
+		velsens = 1.0f + 2 * default_preset[velocity_sensitivity_param];
+		if(default_preset[velocity_sensitivity_param] < 0.25f) velsens -= 0.75f - 3.0f * default_preset[velocity_sensitivity_param];
+
+		width = 0.03f * default_preset[stereo_width_param];
+		//poly = 1 + (long)(31.9f * param[polyphony_param]);
+		fine = default_preset[fine_tuning_param] - 0.5f;
+		random = 0.077f * default_preset[random_tuning_param] * default_preset[random_tuning_param];
+		stretch = 0.0f; //0.000434f * (param[overdrive_param] - 0.5f); parameter re-used for overdrive!
+		overdrive = 1.8f * default_preset[overdrive_param];
+	}
 
 //set functions
 void mdaEPianoVoice::set_sustain(unsigned short v) 	{ sustain = v; }
@@ -121,24 +151,24 @@ void mdaEPianoVoice::set_rmod(float v) 				{ rmod = v; }
 
 void mdaEPianoVoice::update()
 {
-	size = (long)(12.0f * param[hardness_param] - 6.0f);
-	treb = 4.0f * param[treble_boost_param] * param[treble_boost_param] - 1.0f; //treble gain
-	if(param[treble_boost_param] > 0.5f) tfrq = 14000.0f; else tfrq = 5000.0f; //treble freq
+	size = (long)(12.0f * *p(p_hardness) - 6.0f);
+	treb = 4.0f * *p(p_treble_boost) * *p(p_treble_boost) - 1.0f; //treble gain
+	if(*p(p_treble_boost) > 0.5f) tfrq = 14000.0f; else tfrq = 5000.0f; //treble freq
 	tfrq = 1.0f - (float)exp(-iFs * tfrq);
 
-	rmod = lmod = param[mod_param] + param[mod_param] - 1.0f; //lfo depth
-	if(param[mod_param] < 0.5f) rmod = -rmod;
-	dlfo = 6.283f * iFs * (float)exp(6.22f * param[lfo_rate_param] - 2.61f); //lfo rate
+	rmod = lmod = *p(p_modulation) + *p(p_modulation) - 1.0f; //lfo depth
+	if(*p(p_modulation) < 0.5f) rmod = -rmod;
+	dlfo = 6.283f * iFs * (float)exp(6.22f * *p(p_lfo_rate) - 2.61f); //lfo rate
 
-	velsens = 1.0f + param[velosense_param] + param[velosense_param];
-	if(param[velosense_param] < 0.25f) velsens -= 0.75f - 3.0f * param[velosense_param];
+	velsens = 1.0f + *p(p_velocity_sensitivity) + *p(p_velocity_sensitivity);
+	if(*p(p_velocity_sensitivity) < 0.25f) velsens -= 0.75f - 3.0f * *p(p_velocity_sensitivity);
 
-	width = 0.03f * param[stereo_width_param];
+	width = 0.03f * *p(p_stereo_width);
 	//poly = 1 + (long)(31.9f * param[polyphony_param]);
-	fine = param[fine_tuning_param] - 0.5f;
-	random = 0.077f * param[random_tuning_param] * param[random_tuning_param];
+	fine = *p(p_fine_tuning) - 0.5f;
+	random = 0.077f * *p(p_random_tuning) * *p(p_random_tuning);
 	stretch = 0.0f; //0.000434f * (param[overdrive_param] - 0.5f); parameter re-used for overdrive!
-	overdrive = 1.8f * param[overdrive_param];
+	overdrive = 1.8f * *p(p_overdrive);
 }
 
 void mdaEPianoVoice::on(unsigned char key, unsigned char velocity) { 
@@ -179,7 +209,7 @@ void mdaEPianoVoice::on(unsigned char key, unsigned char velocity) {
 
 		if(key > 60) env *= (float)exp(0.01f * (float)(60 - key)); //new! high notes quieter
 
-		l = 50.0f + param[mod_param] * param[mod_param] * muff + muffvel * (float)(velocity - 64); //muffle
+		l = 50.0f + *p(p_modulation) * *p(p_modulation) * muff + muffvel * (float)(velocity - 64); //muffle
 		if(l < (55.0f + 0.4f * (float)key)) l = 55.0f + 0.4f * (float)key;
 		if(l > 210.0f) l = 210.0f;
 		ff = l * l * iFs;
@@ -193,22 +223,13 @@ void mdaEPianoVoice::on(unsigned char key, unsigned char velocity) {
 		outl = l + l - outr;
 
 		if(key < 44) key = 44; //limit max decay length
-		dec = (float)exp(-iFs * exp(-1.0 + 0.03 * (double)key - 2.0f * param[envelope_decay_param]));
+		dec = (float)exp(-iFs * exp(-1.0 + 0.03 * (double)key - 2.0f * *p(p_envelope_decay)));
 	}
-	/*
-	   else { //note off
-	   if(sustain==0) {
-	   dec = (float)exp(-iFs * exp(6.0 + 0.01 * (double)note - 5.0 * param[envelope_release_param]));
-	   } else {
-	   note = SUSTAIN;
-	   }
-	   }
-	   */
 }
 
 void mdaEPianoVoice::off(unsigned char velocity) { 
 	if(sustain==0) {
-		dec = (float)exp(-iFs * exp(6.0 + 0.01 * (double)note - 5.0 * param[envelope_release_param]));
+		dec = (float)exp(-iFs * exp(6.0 + 0.01 * (double)note - 5.0 * *p(p_envelope_release)));
 	} else {
 		note = SUSTAIN;
 	}
@@ -249,10 +270,6 @@ void mdaEPianoVoice::render(uint32_t from, uint32_t to)
 
 		i = waves[pos] + ((frac * (waves[pos + 1] - waves[pos])) >> 16);
 		x = env * (float)i / 32768.0f;
-
-		//same thing here, but didn't work
-		//x = env * (*(float *)&i - 3.0f);  //fast int->float
-
 		env = env * dec;  //envelope
 
 		if(x>0.0f) { x -= od * x * x;  if(x < -env) x = -env; } //+= 0.5f * x * x;  //overdrive

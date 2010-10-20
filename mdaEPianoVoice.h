@@ -48,14 +48,13 @@ class mdaEPianoVoice : public LV2::Voice {
 		unsigned short note; //remember what note triggered this
 		//end --- from VOICE
 
-		float param[NPARAMS];
+		float default_preset[NPARAMS]; //contains the default preset
 
 	protected:
 		unsigned char m_key;
 
 	public:
 		mdaEPianoVoice(double rate);
-		void setParams(float *p);
 		void set_sustain(unsigned short v);
 		void set_volume(float v);
 		void set_dec(float v);
@@ -63,7 +62,7 @@ class mdaEPianoVoice : public LV2::Voice {
 		void set_lmod(float v);
 		void set_rmod(float v);
 
-		void update(void);
+		void update(void); //recalculates internal variables
 		void on(unsigned char key, unsigned char velocity);
 		void off(unsigned char velocity);
 		bool is_sustained(void);

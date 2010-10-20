@@ -33,18 +33,18 @@ mdaEPiano::mdaEPiano(double rate)
 		curProgram = 0;
 
 		// set up default controllers
-		mdaEPiano::controllers[envelope_decay_param] 	= 0x49;
-		mdaEPiano::controllers[envelope_release_param] 	= 0x24;
-		mdaEPiano::controllers[hardness_param] 			= 0x25;
-		mdaEPiano::controllers[treble_boost_param] 		= 0x48;
-		mdaEPiano::controllers[mod_param] 				= 0x26;
-		mdaEPiano::controllers[lfo_rate_param] 			= 0x27;
-		mdaEPiano::controllers[velosense_param] 		= 0x28;
-		mdaEPiano::controllers[stereo_width_param] 		= 0x29;
-		mdaEPiano::controllers[polyphony_param] 		= 0x4A;
-		mdaEPiano::controllers[fine_tuning_param] 		= 0x2A;
-		mdaEPiano::controllers[random_tuning_param] 	= 0x2B;
-		mdaEPiano::controllers[overdrive_param] 		= 0x08;
+		mdaEPiano::controllers[envelope_decay_param] 		= 0x49;
+		mdaEPiano::controllers[envelope_release_param] 		= 0x24;
+		mdaEPiano::controllers[hardness_param] 				= 0x25;
+		mdaEPiano::controllers[treble_boost_param] 			= 0x48;
+		mdaEPiano::controllers[modulation_param]			= 0x26;
+		mdaEPiano::controllers[lfo_rate_param] 				= 0x27;
+		mdaEPiano::controllers[velocity_sensitivity_param] 	= 0x28;
+		mdaEPiano::controllers[stereo_width_param] 			= 0x29;
+		mdaEPiano::controllers[polyphony_param] 			= 0x4A;
+		mdaEPiano::controllers[fine_tuning_param] 			= 0x2A;
+		mdaEPiano::controllers[random_tuning_param] 		= 0x2B;
+		mdaEPiano::controllers[overdrive_param] 			= 0x08;
 
 		if(programs)
 		{
@@ -63,12 +63,10 @@ mdaEPiano::mdaEPiano(double rate)
 		for(uint32_t i=0; i<NVOICES; ++i)
 		{
 			voices[i] = new mdaEPianoVoice(rate);
-			voices[i]->setParams(programs[curProgram].param);
 			add_voices(voices[i]);
 		}
 
 		add_audio_outputs(p_left, p_right);
-		setProgram(0);
 	}
 
 signed char mdaEPiano::get_param_id_from_controller(unsigned char cc)
@@ -120,16 +118,26 @@ void mdaEPiano::setParameter(unsigned char id, float value)
 	if(id>=NPARAMS) 
 		return;
 
-	programs[curProgram].param[id] = value;
-	setProgram(curProgram); //update all voices
+	//set the control parameter (offset needed because first few ports are audio and midi)
+	*p(id+CONTROL_PORT_OFFSET) = value;
+
+	//update all voices	
+	for (unsigned i = 0; i < NVOICES; ++i)
+		voices[i]->update();
+
 	printf("changed %i to %f\n", id, value);
 }
 
-void mdaEPiano::setProgram(uint32_t program)
+void mdaEPiano::setProgram(uint32_t program_id)
 {
-	curProgram = program;
-	for (uint32_t v=0; v<NVOICES; ++v)
-		voices[v]->setParams(programs[curProgram].param);
+	if (program_id >= NPROGS)
+		return;
+
+	curProgram = program_id;
+
+	//update the control ports
+	for(unsigned char a=0; a<NPARAMS; ++a)
+		*p(a+CONTROL_PORT_OFFSET) = programs[curProgram].param[a];
 
 	update();
 }
@@ -154,9 +162,9 @@ void mdaEPiano::fillpatch(uint32_t p, const char *name, float p0, float p1,
 	programs[p].param[envelope_release_param] = p1;
 	programs[p].param[hardness_param] = p2;
 	programs[p].param[treble_boost_param] = p3;
-	programs[p].param[mod_param] = p4;
+	programs[p].param[modulation_param] = p4;
 	programs[p].param[lfo_rate_param] = p5;
-	programs[p].param[velosense_param] = p6;
+	programs[p].param[velocity_sensitivity_param] = p6;
 	programs[p].param[stereo_width_param] = p7;
 	programs[p].param[polyphony_param] = p8;
 	programs[p].param[fine_tuning_param] = p9;
@@ -214,7 +222,8 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 			{
 				signed char param_id = -1;
 				param_id = get_param_id_from_controller(data[1]);
-				if(param_id >= 0) setParameter(param_id, scale_midi_to_f(data[2]));
+				float new_value = scale_midi_to_f(data[2]);
+				if(param_id >= 0) setParameter(param_id, new_value);
 			}
 
 			// standard controller stuff
@@ -232,7 +241,7 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 						for (unsigned i = 0; i < NVOICES; ++i) {
 							//set lfo depth
 							voices[i]->set_lmod(modwhl);
-							if(programs[curProgram].param[mod_param] < 0.5f)
+							if(programs[curProgram].param[modulation_param] < 0.5f)
 								voices[i]->set_rmod(-modwhl);
 							else
 								voices[i]->set_rmod(-modwhl);
@@ -292,4 +301,5 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 		default: break;
 	}
 }
+
 static int _ = mdaEPiano::register_class(p_uri);
