@@ -177,4 +177,14 @@
 		lv2:minimum 0;
 		lv2:maximum 1;
 		lv2:default 0.000;
+	],
+
+	[
+		a lv2:ControlPort, lv2:InputPort;
+		lv2:index 15;
+		lv2:symbol "param_changed";
+		lv2:name "Parameter Changed";
+		lv2:minimum 0;
+		lv2:maximum 1;
+		lv2:default 0.000;
 	].
