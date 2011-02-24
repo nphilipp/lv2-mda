@@ -23,7 +23,7 @@
 	doap:maintainer [
 		a foaf:Person;
 		foaf:name "Ricardo Wurmus";
-		foaf:homepage "http://rekado.wurmus.de"
+		foaf:homepage <http://rekado.wurmus.de>
 	];
 	doap:license <http://usefulinc.com/doap/licenses/gpl>;
 	ll:pegName "p";
