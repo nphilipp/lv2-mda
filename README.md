@@ -6,6 +6,7 @@ Port
 
 mdaEPiano
   Author: Paul Kellett (paul.kellett@mda-vst.com)
+          http://sourceforge.net/projects/mda-vst/
 
 ----------------------
 
