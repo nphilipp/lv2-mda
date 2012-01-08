@@ -54,3 +54,11 @@ None. Only missing features:
   - proper note stealing as in the original
   - GUI (I don't need it)
   - saving and importing of presets (should be handled by the host)
+
+
+## License
+
+The original mda VST plug-ins by Paul Kellett are released under the MIT
+license or under the GPL "either version 2 of the License, or (at your option)
+any later version". The LV2 port of the mdaEPiano plugin by rekado is released
+under the same licenses.
