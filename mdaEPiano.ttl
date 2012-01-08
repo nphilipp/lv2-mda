@@ -8,26 +8,26 @@
 @prefix ev: <http://lv2plug.in/ns/ext/event#>.
 @prefix ui: <http://lv2plug.in/ns/extensions/ui#>.
 
-<http://rekado.wurmus.de/lv2/mdaEPiano/gui>
+<http://elephly.net/lv2/mdaEPiano/gui>
   a ui:GtkUI;
   ui:binary <mdaEPianoGUI.so>;
   ui:requiredFeature ui:makeResident;
   ui:optionalFeature ui:Event.
 
-<http://rekado.wurmus.de/lv2/mdaEPiano/out> a pg:StereoGroup.
+<http://elephly.net/lv2/mdaEPiano/out> a pg:StereoGroup.
 
-<http://rekado.wurmus.de/lv2/mdaEPiano>
+<http://elephly.net/lv2/mdaEPiano>
 	a lv2:Plugin, lv2:InstrumentPlugin;
 	lv2:binary <mdaEPiano.so>;
 	doap:name "mdaEPiano";
 	doap:maintainer [
 		a foaf:Person;
 		foaf:name "Ricardo Wurmus";
-		foaf:homepage <http://rekado.wurmus.de>
+		foaf:homepage <http://elephly.net>
 	];
 	doap:license <http://usefulinc.com/doap/licenses/gpl>;
 	ll:pegName "p";
-	ui:ui <http://rekado.wurmus.de/lv2/mdaEPiano/gui>;
+	ui:ui <http://elephly.net/lv2/mdaEPiano/gui>;
 
 	lv2:port [
 		a ev:EventPort, lv2:InputPort;
@@ -43,7 +43,7 @@
 		lv2:symbol "left";
 		lv2:name "Left";
 		pg:membership [
-			pg:group <http://rekado.wurmus.de/lv2/mdaEPiano/out>;
+			pg:group <http://elephly.net/lv2/mdaEPiano/out>;
 			pg:role pg:leftChannel;
 		];
 	],
@@ -54,7 +54,7 @@
 		lv2:symbol "right";
 		lv2:name "Right";
 		pg:membership [
-			pg:group <http://rekado.wurmus.de/lv2/mdaEPiano/out>;
+			pg:group <http://elephly.net/lv2/mdaEPiano/out>;
 			pg:role pg:rightChannel;
 		];
 	],

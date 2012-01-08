@@ -34,7 +34,7 @@ This will copy the compiled plugin to `/usr/local/lib/lv2`.
 At the current stage you will need an LV2 host to use the plugin. I'm using
 `lv2_jack_host` during development:
 
-    lv2_jack_host http://rekado.wurmus.de/lv2/mdaEPiano
+    lv2_jack_host http://elephly.net/lv2/mdaEPiano
 
 You should now be able to connect your MIDI device to the plugin via JACK. Also
 don't forget to connect the plugin's stereo output to your system's outputs:
