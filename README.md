@@ -8,6 +8,7 @@ mdaEPiano
   Author: Paul Kellett (paul.kellett@mda-vst.com)
           http://sourceforge.net/projects/mda-vst/
 
+[![button](http://api.flattr.com/button/flattr-badge-large.png "Flattr this")](http://flattr.com/thing/72898/LV2-port-of-the-mda-E-Piano-VSTi)
 ----------------------
 
 ## About
