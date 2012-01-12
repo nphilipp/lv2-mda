@@ -8,7 +8,7 @@ $(BUNDLE): manifest.ttl mdaEPiano.ttl mdaEPiano.so
 	cp $^ $(BUNDLE)
 
 mdaEPiano.so: mdaEPiano.cpp mdaEPianoVoice.cpp mdaEPianoData.cpp mdaEPiano.peg
-	g++ -shared -fPIC -DPIC mdaEPiano.cpp mdaEPianoVoice.cpp mdaEPianoData.cpp `pkg-config --cflags --libs lv2-plugin` -o mdaEPiano.so
+	g++ -shared -g -O -Wall -Weffc++ -pedantic -fPIC -DPIC mdaEPiano.cpp mdaEPianoVoice.cpp mdaEPianoData.cpp `pkg-config --cflags --libs lv2-plugin` -o mdaEPiano.so
 
 mdaEPiano.peg: mdaEPiano.ttl
 	lv2peg mdaEPiano.ttl mdaEPiano.peg

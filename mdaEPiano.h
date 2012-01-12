@@ -2,16 +2,19 @@
 #define MDA_EPIANO_H
 //See associated .cpp file for copyright and other info
 
-#include <lv2synth.hpp>
+#define MAX_PRG_NAME 24
 #include "mdaEPianoVoice.h"
 #include "mdaEPiano.peg"
+
+#pragma GCC system_header
+#include <lv2synth.hpp>
 
 class mdaEPianoProgram
 {
 	friend class mdaEPiano;
 	private:
 	float param[NPARAMS];
-	char  name[24];
+	char  name[MAX_PRG_NAME];
 };
 
 class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {

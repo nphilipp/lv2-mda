@@ -2,8 +2,10 @@
 #define MDA_EPIANO_VOICE_H
 
 #include "mdaEPianoCommon.h"
-#include <lv2synth.hpp>
 #include "mdaEPiano.peg"
+
+#pragma GCC system_header
+#include <lv2synth.hpp>
 
 struct KGRP  //keygroup
 {
