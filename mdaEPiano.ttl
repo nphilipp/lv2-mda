@@ -6,13 +6,6 @@
 @prefix ll: <http://ll-plugins.nongnu.org/lv2/namespace#>.
 @prefix pg: <http://ll-plugins.nongnu.org/lv2/ext/portgroups#>.
 @prefix ev: <http://lv2plug.in/ns/ext/event#>.
-@prefix ui: <http://lv2plug.in/ns/extensions/ui#>.
-
-<http://elephly.net/lv2/mdaEPiano/gui>
-  a ui:GtkUI;
-  ui:binary <mdaEPianoGUI.so>;
-  ui:requiredFeature ui:makeResident;
-  ui:optionalFeature ui:Event.
 
 <http://elephly.net/lv2/mdaEPiano/out> a pg:StereoGroup.
 
@@ -27,7 +20,6 @@
 	];
 	doap:license <http://usefulinc.com/doap/licenses/gpl>;
 	ll:pegName "p";
-	ui:ui <http://elephly.net/lv2/mdaEPiano/gui>;
 
 	lv2:port [
 		a ev:EventPort, lv2:InputPort;
