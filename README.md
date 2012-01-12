@@ -27,7 +27,8 @@ To compile the plugin, just execute the following statement:
     make && sudo make install
 
 This will copy the compiled plugin to `/usr/local/lib/lv2`.
-**NOTE**: you will need larsl's `lv2-c++-tools` to compile this plugin: http://freshmeat.net/projects/lv2-c-tools
+
+**NOTE**: you will need larsl's `lv2-c++-tools` to compile this plugin: http://freecode.com/projects/lv2-c-tools
 
 
 ## Connecting
