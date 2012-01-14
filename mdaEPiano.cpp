@@ -191,7 +191,7 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 							if(*p(modulation_param+CONTROL_PORT_OFFSET) < 0.5f)
 								voices[i]->set_rmod(-modwhl);
 							else
-								voices[i]->set_rmod(-modwhl);
+								voices[i]->set_rmod(modwhl);
 						}
 					}
 					break;
