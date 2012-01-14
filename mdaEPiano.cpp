@@ -109,8 +109,9 @@ void mdaEPiano::setParameter(unsigned char id, float value)
 	//update all voices	
 	for (unsigned i = 0; i < NVOICES; ++i)
 		voices[i]->update();
-
+#ifdef DEBUG
 	printf("changed %i to %f\n", id, value);
+#endif
 }
 
 void mdaEPiano::update() //parameter change
