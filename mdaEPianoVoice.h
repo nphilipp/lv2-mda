@@ -7,21 +7,12 @@
 #pragma GCC system_header
 #include <lv2synth.hpp>
 
-struct KGRP  //keygroup
-{
-	long root;  //MIDI root note
-	long high;  //highest note
-	long pos;
-	long end;
-	long loop;
-};
-
 class mdaEPianoVoice : public LV2::Voice {
 	private:
 		float Fs, iFs;
 
 		///global internal variables
-		KGRP  kgrp[34];
+		KGRP  *kgrp;
 		short *waves;
 		short sustain;
 		float width;
@@ -56,7 +47,7 @@ class mdaEPianoVoice : public LV2::Voice {
 		unsigned char m_key;
 
 	public:
-		mdaEPianoVoice(double rate);
+		mdaEPianoVoice(double, short*, KGRP*);
 		void set_sustain(unsigned short v);
 		void set_volume(float v);
 		void set_dec(float v);
