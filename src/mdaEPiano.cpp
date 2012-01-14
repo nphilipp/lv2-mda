@@ -18,6 +18,9 @@
 #include <iostream>
 #include <cstdlib> //for exit
 
+#define STRING_BUF 2048
+static const char* sample_file = "samples.raw";
+
 mdaEPiano::mdaEPiano(double rate)
   : LV2::Synth<mdaEPianoVoice, mdaEPiano>(p_n_ports, p_midi) {
 
@@ -254,8 +257,13 @@ void mdaEPiano::load_samples(short **buffer)
 {
   FILE *f;
   long num, size;
+  char filepath[STRING_BUF];
 
-  f = fopen("samples.raw", "rb");
+  strncpy(filepath, bundle_path(), STRING_BUF);
+  strncat(filepath,
+          sample_file,
+          STRING_BUF - strlen(filepath));
+  f = fopen(filepath, "rb");
   if (f == NULL) {
     fputs("File error", stderr);
     exit(1);
