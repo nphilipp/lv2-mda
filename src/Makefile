@@ -5,7 +5,7 @@ SOURCES = *.cpp
 FLAGS = -fPIC -DPIC -O $(WARNINGS)
 WARNINGS = #-g -Wall -pedantic
 
-$(BUNDLE): manifest.ttl mdaEPiano.ttl mdaEPiano.so data/samples.raw
+$(BUNDLE): manifest.ttl mdaEPiano.ttl mdaEPiano.so data/samples.raw presets
 	rm -rf $(BUNDLE)
 	mkdir $(BUNDLE)
 	cp -r $^ $(BUNDLE)
