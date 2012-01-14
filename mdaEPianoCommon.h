@@ -2,7 +2,6 @@
 #define MDA_EPIANO_COMMON_H
 
 #define NPARAMS 12       //number of parameters
-#define NPROGS   8       //number of programs
 #define NOUTS    2       //number of outputs
 #define NVOICES 64       //max polyphony
 #define SUSTAIN 128

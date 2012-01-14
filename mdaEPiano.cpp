@@ -30,7 +30,6 @@ mdaEPiano::mdaEPiano(double rate)
 
 		//init global variables
 		sustain = 0;
-		curProgram = 0;
 
 		// set up default controllers
 		mdaEPiano::controllers[envelope_decay_param] 		= 0x49;
@@ -45,20 +44,6 @@ mdaEPiano::mdaEPiano(double rate)
 		mdaEPiano::controllers[fine_tuning_param] 			= 0x2A;
 		mdaEPiano::controllers[random_tuning_param] 		= 0x2B;
 		mdaEPiano::controllers[overdrive_param] 			= 0x08;
-
-		if(programs)
-		{
-			//fill patches...
-			uint32_t i=0;
-			fillpatch(i++, "Default", 0.500f, 0.500f, 0.500f, 0.500f, 0.500f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.146f, 0.000f);
-			fillpatch(i++, "Bright", 0.500f, 0.500f, 1.000f, 0.800f, 0.500f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.146f, 0.500f);
-			fillpatch(i++, "Mellow", 0.500f, 0.500f, 0.000f, 0.000f, 0.500f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.246f, 0.000f);
-			fillpatch(i++, "Autopan", 0.500f, 0.500f, 0.500f, 0.500f, 0.250f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.246f, 0.000f);
-			fillpatch(i++, "Tremolo", 0.500f, 0.500f, 0.500f, 0.500f, 0.750f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.246f, 0.000f);
-			fillpatch(i++, "(default)", 0.500f, 0.500f, 0.500f, 0.500f, 0.500f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.146f, 0.000f);
-			fillpatch(i++, "(default)", 0.500f, 0.500f, 0.500f, 0.500f, 0.500f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.146f, 0.000f);
-			fillpatch(i++, "(default)", 0.500f, 0.500f, 0.500f, 0.500f, 0.500f, 0.650f, 0.250f, 0.500f, 0.50f, 0.500f, 0.146f, 0.000f);
-		}
 
 		for(uint32_t i=0; i<NVOICES; ++i)
 		{
@@ -128,48 +113,10 @@ void mdaEPiano::setParameter(unsigned char id, float value)
 	printf("changed %i to %f\n", id, value);
 }
 
-void mdaEPiano::setProgram(uint32_t program_id)
-{
-	if (program_id >= NPROGS)
-		return;
-
-	curProgram = program_id;
-
-	//update the control ports
-	for(unsigned char a=0; a<NPARAMS; ++a)
-		*p(a+CONTROL_PORT_OFFSET) = programs[curProgram].param[a];
-
-	update();
-}
-
 void mdaEPiano::update() //parameter change
 {
 	for (uint32_t v=0; v<NVOICES; ++v)
 		voices[v]->update();
-}
-
-void mdaEPiano::fillpatch(uint32_t p, const char *name, float p0, float p1,
-		float p2, float p3,
-		float p4, float p5,
-		float p6, float p7,
-		float p8, float p9,
-		float p10, float p11)
-{
-	//TODO: better use strncopy (first learn how)
-	//strncpy(programs[p].name, name, 50);
-	strcpy(programs[p].name, name);
-	programs[p].param[envelope_decay_param] = p0;
-	programs[p].param[envelope_release_param] = p1;
-	programs[p].param[hardness_param] = p2;
-	programs[p].param[treble_boost_param] = p3;
-	programs[p].param[modulation_param] = p4;
-	programs[p].param[lfo_rate_param] = p5;
-	programs[p].param[velocity_sensitivity_param] = p6;
-	programs[p].param[stereo_width_param] = p7;
-	programs[p].param[polyphony_param] = p8;
-	programs[p].param[fine_tuning_param] = p9;
-	programs[p].param[random_tuning_param] = p10;
-	programs[p].param[overdrive_param] = p11;
 }
 
 void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
@@ -241,7 +188,7 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 						for (unsigned i = 0; i < NVOICES; ++i) {
 							//set lfo depth
 							voices[i]->set_lmod(modwhl);
-							if(programs[curProgram].param[modulation_param] < 0.5f)
+							if(*p(modulation_param+CONTROL_PORT_OFFSET) < 0.5f)
 								voices[i]->set_rmod(-modwhl);
 							else
 								voices[i]->set_rmod(-modwhl);
@@ -291,11 +238,6 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 					}
 					break;
 			}
-			break;
-
-			//program change
-		case 0xC0:
-			if(data[1]<NPROGS) setProgram(data[1]);
 			break;
 
 		default: break;
