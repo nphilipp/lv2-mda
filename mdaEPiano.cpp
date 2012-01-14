@@ -188,7 +188,7 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 						for (unsigned i = 0; i < NVOICES; ++i) {
 							//set lfo depth
 							voices[i]->set_lmod(modwhl);
-							if(*p(modulation_param+CONTROL_PORT_OFFSET) < 0.5f)
+							if(*p(p_modulation) < 0.5f)
 								voices[i]->set_rmod(-modwhl);
 							else
 								voices[i]->set_rmod(modwhl);
