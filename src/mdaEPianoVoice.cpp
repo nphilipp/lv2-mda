@@ -76,7 +76,8 @@ void mdaEPianoVoice::update()
   overdrive = 1.8f * *p(p_overdrive);
 }
 
-void mdaEPianoVoice::on(unsigned char key, unsigned char velocity) { 
+void mdaEPianoVoice::on(unsigned char key, unsigned char velocity)
+{
   // store key that turned this voice on (used in 'get_key')
   m_key = key;
 
@@ -88,7 +89,7 @@ void mdaEPianoVoice::on(unsigned char key, unsigned char velocity) {
   f0 = f1 = 0.0f;
 
   // TODO: some keyboards send note off events as 'note on \w velocity 0'
-  if(velocity > 0) 
+  if(velocity > 0)
   {
     k = (key - 60) * (key - 60);
     l = fine + random * ((float)(k % 13) - 6.5f); // random & fine tune
