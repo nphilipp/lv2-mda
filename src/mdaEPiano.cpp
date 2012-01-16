@@ -34,18 +34,18 @@ mdaEPiano::mdaEPiano(double rate)
   sustain = 0;
 
   // set up default controllers
-  mdaEPiano::controllers[envelope_decay_param]       = 0x49;
-  mdaEPiano::controllers[envelope_release_param]     = 0x24;
-  mdaEPiano::controllers[hardness_param]             = 0x25;
-  mdaEPiano::controllers[treble_boost_param]         = 0x48;
-  mdaEPiano::controllers[modulation_param]           = 0x26;
-  mdaEPiano::controllers[lfo_rate_param]             = 0x27;
-  mdaEPiano::controllers[velocity_sensitivity_param] = 0x28;
-  mdaEPiano::controllers[stereo_width_param]         = 0x29;
-  mdaEPiano::controllers[polyphony_param]            = 0x4A;
-  mdaEPiano::controllers[fine_tuning_param]          = 0x2A;
-  mdaEPiano::controllers[random_tuning_param]        = 0x2B;
-  mdaEPiano::controllers[overdrive_param]            = 0x08;
+  controllers[envelope_decay_param]       = 0x49;
+  controllers[envelope_release_param]     = 0x24;
+  controllers[hardness_param]             = 0x25;
+  controllers[treble_boost_param]         = 0x48;
+  controllers[modulation_param]           = 0x26;
+  controllers[lfo_rate_param]             = 0x27;
+  controllers[velocity_sensitivity_param] = 0x28;
+  controllers[stereo_width_param]         = 0x29;
+  controllers[polyphony_param]            = 0x4A;
+  controllers[fine_tuning_param]          = 0x2A;
+  controllers[random_tuning_param]        = 0x2B;
+  controllers[overdrive_param]            = 0x08;
 
   load_kgrp(kgrp);
   load_samples(&samples);
