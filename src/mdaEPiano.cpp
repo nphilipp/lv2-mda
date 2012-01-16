@@ -124,6 +124,10 @@ void mdaEPiano::update() //parameter change
 }
 
 void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
+#ifdef DEBUG
+  printf("%d\n", data[1]);
+#endif
+
   //discard invalid midi messages
   if (size != 3)
     return;
