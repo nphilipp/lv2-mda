@@ -110,10 +110,7 @@ void mdaEPiano::setParameter(unsigned char id, float value)
 
   //set the control parameter (offset needed because first few ports are audio and midi)
   *p(id+CONTROL_PORT_OFFSET) = value;
-
-  //update all voices
-  for (unsigned i = 0; i < NVOICES; ++i)
-    voices[i]->update();
+  update();
 
 #ifdef DEBUG
   printf("changed %i to %f\n", id, value);
