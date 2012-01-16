@@ -130,7 +130,7 @@ void mdaEPiano::update() //parameter change
 
 void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
   //discard invalid midi messages
-  if (size < 2)
+  if (size != 3)
     return;
 
   //receive on all channels
@@ -138,10 +138,6 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
   {
     case 0x80: //note off
       {
-        //discard invalid midi messages
-        if (size != 3)
-          return;
-
         for (unsigned i = 0; i < NVOICES; ++i) {
           if (voices[i]->get_key() == data[1]) {
             voices[i]->off(data[2]);
@@ -153,26 +149,16 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 
     case 0x90: //note on
       {
-        //discard invalid midi messages
-        if (size != 3)
-          return;
-
         unsigned int v = find_free_voice(data[1], data[2]);
         if (v < NVOICES)
           voices[v]->on(data[1], data[2]);
       }
       break;
 
-    case 0xE0: //pitch bend
-      {
-        //discard invalid midi messages
-        if (size != 3)
-          return;
-        //TODO: change pitch
-      }
+    case 0xE0: //TODO: pitch bend
       break;
 
-      //controller
+    //controller
     case 0xB0:
       //WIP: control preset parameters with assigned controllers
       {
@@ -186,10 +172,6 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
       switch(data[1])
       {
         case 0x01: //mod wheel
-          //discard invalid midi messages
-          if (size != 3)
-            return;
-
           //scale the mod value to cover the range [0..1]
           modwhl = scale_midi_to_f(data[2]);
           if(modwhl > 0.05f) //over-ride pan/trem depth
@@ -205,23 +187,15 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
           }
           break;
 
-          //volume
+        //volume
         case 0x07:
-          //discard invalid midi messages
-          if (size != 3)
-            return;
-
           setVolume(0.00002f * (float)(data[2] * data[2]));
           break;
 
-          //sustain pedal
+        //sustain pedal
         case 0x40:
-          //sostenuto pedal
+        //sostenuto pedal
         case 0x42:
-          //discard invalid midi messages
-          if (size != 3)
-            return;
-
           {
             sustain = data[2] & 0x40;
 
@@ -234,18 +208,22 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
           }
           break;
 
-          //all notes off
-        default:
-          if(data[1]>0x7A)
+        //all sound off
+        case 0x78:
+          for(short v=0; v<NVOICES; v++)
           {
-            for(short v=0; v<NVOICES; v++)
-            {
-              voices[v]->set_dec(0.99f);
-              voices[v]->set_sustain(0);
-              voices[v]->set_muff(160.0f);
-            }
+            voices[v]->off(0);
+          }
+        //all notes off
+        case 0x7b:
+          for(short v=0; v<NVOICES; v++)
+          {
+            voices[v]->set_dec(0.99f);
+            voices[v]->set_sustain(0);
+            voices[v]->set_muff(160.0f);
           }
           break;
+        default: break;
       }
       break;
 
