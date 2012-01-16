@@ -12,18 +12,18 @@ mdaEPianoVoice::mdaEPianoVoice(double rate, short * samples, KGRP * master_kgrp)
 
   // TODO: this is bad. Should get this from the mdaEPiano class
   // default preset
-  default_preset[envelope_decay_param]       = 0.500f;
-  default_preset[envelope_release_param]     = 0.500f;
-  default_preset[hardness_param]             = 0.500f;
-  default_preset[treble_boost_param]         = 0.500f;
-  default_preset[modulation_param]           = 0.500f;
-  default_preset[lfo_rate_param]             = 0.650f;
-  default_preset[velocity_sensitivity_param] = 0.250f;
-  default_preset[stereo_width_param]         = 0.500f;
-  default_preset[polyphony_param]            = 0.500f;
-  default_preset[fine_tuning_param]          = 0.500f;
-  default_preset[random_tuning_param]        = 0.146f;
-  default_preset[overdrive_param]            = 0.000f;
+  default_preset[p_envelope_decay]       = 0.500f;
+  default_preset[p_envelope_release]     = 0.500f;
+  default_preset[p_hardness]             = 0.500f;
+  default_preset[p_treble_boost]         = 0.500f;
+  default_preset[p_modulation]           = 0.500f;
+  default_preset[p_lfo_rate]             = 0.650f;
+  default_preset[p_velocity_sensitivity] = 0.250f;
+  default_preset[p_stereo_width]         = 0.500f;
+  default_preset[p_polyphony]            = 0.500f;
+  default_preset[p_fine_tuning]          = 0.500f;
+  default_preset[p_random_tuning]        = 0.146f;
+  default_preset[p_overdrive]            = 0.000f;
 
   reset();
   volume = 0.2f;
@@ -34,24 +34,24 @@ mdaEPianoVoice::mdaEPianoVoice(double rate, short * samples, KGRP * master_kgrp)
     of the voices. */
 
   // TODO: this duplicates code in void mdaEPianoVoice::update() --- refactor!
-  size = (long)(12.0f * default_preset[hardness_param] - 6.0f);
-  treb = 4.0f * default_preset[treble_boost_param] * default_preset[treble_boost_param] - 1.0f; // treble gain
-  if(default_preset[treble_boost_param] > 0.5f) tfrq = 14000.0f; else tfrq = 5000.0f; // treble freq
+  size = (long)(12.0f * default_preset[p_hardness] - 6.0f);
+  treb = 4.0f * default_preset[p_treble_boost] * default_preset[p_treble_boost] - 1.0f; // treble gain
+  if(default_preset[p_treble_boost] > 0.5f) tfrq = 14000.0f; else tfrq = 5000.0f; // treble freq
   tfrq = 1.0f - (float)exp(-iFs * tfrq);
 
-  rmod = lmod = 2 * default_preset[modulation_param] - 1.0f; // lfo depth
-  if(default_preset[modulation_param] < 0.5f) rmod = -rmod;
-  dlfo = 6.283f * iFs * (float)exp(6.22f * default_preset[lfo_rate_param] - 2.61f); // lfo rate
+  rmod = lmod = 2 * default_preset[p_modulation] - 1.0f; // lfo depth
+  if(default_preset[p_modulation] < 0.5f) rmod = -rmod;
+  dlfo = 6.283f * iFs * (float)exp(6.22f * default_preset[p_lfo_rate] - 2.61f); // lfo rate
 
-  velsens = 1.0f + 2 * default_preset[velocity_sensitivity_param];
-  if(default_preset[velocity_sensitivity_param] < 0.25f) velsens -= 0.75f - 3.0f * default_preset[velocity_sensitivity_param];
+  velsens = 1.0f + 2 * default_preset[p_velocity_sensitivity];
+  if(default_preset[p_velocity_sensitivity] < 0.25f) velsens -= 0.75f - 3.0f * default_preset[p_velocity_sensitivity];
 
-  width = 0.03f * default_preset[stereo_width_param];
-  //poly = 1 + (long)(31.9f * param[polyphony_param]);
-  fine = default_preset[fine_tuning_param] - 0.5f;
-  random = 0.077f * default_preset[random_tuning_param] * default_preset[random_tuning_param];
-  stretch = 0.0f; //0.000434f * (param[overdrive_param] - 0.5f); parameter re-used for overdrive!
-  overdrive = 1.8f * default_preset[overdrive_param];
+  width = 0.03f * default_preset[p_stereo_width];
+  //poly = 1 + (long)(31.9f * param[p_polyphony]);
+  fine = default_preset[p_fine_tuning] - 0.5f;
+  random = 0.077f * default_preset[p_random_tuning] * default_preset[p_random_tuning];
+  stretch = 0.0f; //0.000434f * (param[p_overdrive] - 0.5f); parameter re-used for overdrive!
+  overdrive = 1.8f * default_preset[p_overdrive];
 }
 
 void mdaEPianoVoice::update()

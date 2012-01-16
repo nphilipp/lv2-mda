@@ -34,18 +34,18 @@ mdaEPiano::mdaEPiano(double rate)
   sustain = 0;
 
   // set up default controllers
-  controllers[envelope_decay_param]       = 0x49;
-  controllers[envelope_release_param]     = 0x24;
-  controllers[hardness_param]             = 0x25;
-  controllers[treble_boost_param]         = 0x48;
-  controllers[modulation_param]           = 0x26;
-  controllers[lfo_rate_param]             = 0x27;
-  controllers[velocity_sensitivity_param] = 0x28;
-  controllers[stereo_width_param]         = 0x29;
-  controllers[polyphony_param]            = 0x4A;
-  controllers[fine_tuning_param]          = 0x2A;
-  controllers[random_tuning_param]        = 0x2B;
-  controllers[overdrive_param]            = 0x08;
+  controllers[p_envelope_decay]       = 0x49;
+  controllers[p_envelope_release]     = 0x24;
+  controllers[p_hardness]             = 0x25;
+  controllers[p_treble_boost]         = 0x48;
+  controllers[p_modulation]           = 0x26;
+  controllers[p_lfo_rate]             = 0x27;
+  controllers[p_velocity_sensitivity] = 0x28;
+  controllers[p_stereo_width]         = 0x29;
+  controllers[p_polyphony]            = 0x4A;
+  controllers[p_fine_tuning]          = 0x2A;
+  controllers[p_random_tuning]        = 0x2B;
+  controllers[p_overdrive]            = 0x08;
 
   load_kgrp(kgrp);
   load_samples(&samples);
@@ -109,7 +109,7 @@ void mdaEPiano::setParameter(unsigned char id, float value)
     return;
 
   //set the control parameter (offset needed because first few ports are audio and midi)
-  *p(id+CONTROL_PORT_OFFSET) = value;
+  *p(id) = value;
   update();
 
 #ifdef DEBUG
