@@ -120,7 +120,7 @@ void mdaEPiano::setParameter(unsigned char id, float value)
 void mdaEPiano::update() //parameter change
 {
   for (uint32_t v=0; v<NVOICES; ++v)
-    voices[v]->update();
+    voices[v]->update(Current);
 }
 
 void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {

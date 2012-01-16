@@ -7,6 +7,11 @@
 #pragma GCC system_header
 #include <lv2synth.hpp>
 
+enum Param {
+  Default,
+  Current
+};
+
 class mdaEPianoVoice : public LV2::Voice {
   private:
     float Fs, iFs;
@@ -53,7 +58,8 @@ class mdaEPianoVoice : public LV2::Voice {
     void set_lmod(float v) { lmod = v; }
     void set_rmod(float v) { rmod = v; }
 
-    void update(void); // recalculates internal variables
+    float p_helper(unsigned short, Param);
+    void update(Param); // recalculates internal variables
     void on(unsigned char key, unsigned char velocity);
     void release(unsigned char velocity);
     void reset(void);

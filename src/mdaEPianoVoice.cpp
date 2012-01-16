@@ -27,53 +27,37 @@ mdaEPianoVoice::mdaEPianoVoice(double rate, short * samples, KGRP * master_kgrp)
 
   reset();
   volume = 0.2f;
-
-  /*Initialize voice with default values.
-    Calling update() doesn't work, as it gets values from
-    the control ports. These are not ready yet during initialization
-    of the voices. */
-
-  // TODO: this duplicates code in void mdaEPianoVoice::update() --- refactor!
-  size = (long)(12.0f * default_preset[p_hardness] - 6.0f);
-  treb = 4.0f * default_preset[p_treble_boost] * default_preset[p_treble_boost] - 1.0f; // treble gain
-  if(default_preset[p_treble_boost] > 0.5f) tfrq = 14000.0f; else tfrq = 5000.0f; // treble freq
-  tfrq = 1.0f - (float)exp(-iFs * tfrq);
-
-  rmod = lmod = 2 * default_preset[p_modulation] - 1.0f; // lfo depth
-  if(default_preset[p_modulation] < 0.5f) rmod = -rmod;
-  dlfo = 6.283f * iFs * (float)exp(6.22f * default_preset[p_lfo_rate] - 2.61f); // lfo rate
-
-  velsens = 1.0f + 2 * default_preset[p_velocity_sensitivity];
-  if(default_preset[p_velocity_sensitivity] < 0.25f) velsens -= 0.75f - 3.0f * default_preset[p_velocity_sensitivity];
-
-  width = 0.03f * default_preset[p_stereo_width];
-  //poly = 1 + (long)(31.9f * param[p_polyphony]);
-  fine = default_preset[p_fine_tuning] - 0.5f;
-  random = 0.077f * default_preset[p_random_tuning] * default_preset[p_random_tuning];
-  stretch = 0.0f; //0.000434f * (param[p_overdrive] - 0.5f); parameter re-used for overdrive!
-  overdrive = 1.8f * default_preset[p_overdrive];
+  update(Default);
 }
 
-void mdaEPianoVoice::update()
+float mdaEPianoVoice::p_helper(unsigned short id, Param d)
 {
-  size = (long)(12.0f * *p(p_hardness) - 6.0f);
-  treb = 4.0f * *p(p_treble_boost) * *p(p_treble_boost) - 1.0f; // treble gain
-  if(*p(p_treble_boost) > 0.5f) tfrq = 14000.0f; else tfrq = 5000.0f; // treble freq
+  if (d == Default)
+    return default_preset[id];
+  else
+    return *p(id);
+}
+
+void mdaEPianoVoice::update(Param par)
+{
+  size = (long)(12.0f * p_helper(p_hardness, par) - 6.0f);
+  treb = 4.0f * p_helper(p_treble_boost, par) * p_helper(p_treble_boost, par) - 1.0f; // treble gain
+  if(p_helper(p_treble_boost, par) > 0.5f) tfrq = 14000.0f; else tfrq = 5000.0f; // treble freq
   tfrq = 1.0f - (float)exp(-iFs * tfrq);
 
-  rmod = lmod = *p(p_modulation) + *p(p_modulation) - 1.0f; // lfo depth
-  if(*p(p_modulation) < 0.5f) rmod = -rmod;
-  dlfo = 6.283f * iFs * (float)exp(6.22f * *p(p_lfo_rate) - 2.61f); // lfo rate
+  rmod = lmod = p_helper(p_modulation, par) + p_helper(p_modulation, par) - 1.0f; // lfo depth
+  if(p_helper(p_modulation, par) < 0.5f) rmod = -rmod;
+  dlfo = 6.283f * iFs * (float)exp(6.22f * p_helper(p_lfo_rate, par) - 2.61f); // lfo rate
 
-  velsens = 1.0f + *p(p_velocity_sensitivity) + *p(p_velocity_sensitivity);
-  if(*p(p_velocity_sensitivity) < 0.25f) velsens -= 0.75f - 3.0f * *p(p_velocity_sensitivity);
+  velsens = 1.0f + p_helper(p_velocity_sensitivity, par) + p_helper(p_velocity_sensitivity, par);
+  if(p_helper(p_velocity_sensitivity, par) < 0.25f) velsens -= 0.75f - 3.0f * p_helper(p_velocity_sensitivity, par);
 
-  width = 0.03f * *p(p_stereo_width);
+  width = 0.03f * p_helper(p_stereo_width, par);
   //poly = 1 + (long)(31.9f * param[polyphony_param]);
-  fine = *p(p_fine_tuning) - 0.5f;
-  random = 0.077f * *p(p_random_tuning) * *p(p_random_tuning);
+  fine = p_helper(p_fine_tuning, par) - 0.5f;
+  random = 0.077f * p_helper(p_random_tuning, par) * p_helper(p_random_tuning, par);
   stretch = 0.0f; //0.000434f * (param[overdrive_param] - 0.5f); parameter re-used for overdrive!
-  overdrive = 1.8f * *p(p_overdrive);
+  overdrive = 1.8f * p_helper(p_overdrive, par);
 }
 
 void mdaEPianoVoice::on(unsigned char key, unsigned char velocity)
