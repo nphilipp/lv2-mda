@@ -2,7 +2,7 @@
 #include <iostream>
 
 mdaEPianoVoice::mdaEPianoVoice(double rate, short * samples, KGRP * master_kgrp)
-  : m_key(LV2::INVALID_KEY) {
+{
   //set tuning
   Fs = rate;
   iFs = 1.0f/Fs;
@@ -25,15 +25,8 @@ mdaEPianoVoice::mdaEPianoVoice(double rate, short * samples, KGRP * master_kgrp)
   default_preset[random_tuning_param]        = 0.146f;
   default_preset[overdrive_param]            = 0.000f;
 
-  // initialise...
-  env = 0.0f;
-  dec = 0.99f; // all notes off
-
+  reset();
   volume = 0.2f;
-  muff = 160.0f;
-  sustain = 0;
-  tl = tr = lfo0 = dlfo = 0.0f;
-  lfo1 = 1.0f;
 
   /*Initialize voice with default values.
     Calling update() doesn't work, as it gets values from
@@ -139,7 +132,19 @@ void mdaEPianoVoice::on(unsigned char key, unsigned char velocity) {
   }
 }
 
-void mdaEPianoVoice::off(unsigned char velocity) { 
+void mdaEPianoVoice::reset()
+{
+  env = 0.0f;
+  dec = 0.99f;
+  muff = 160.0f;
+  sustain = 0;
+  tl = tr = lfo0 = dlfo = 0.0f;
+  lfo1 = 1.0f;
+  m_key = LV2::INVALID_KEY;
+}
+
+void mdaEPianoVoice::release(unsigned char velocity)
+{
   if(sustain==0) {
     dec = (float)exp(-iFs * exp(6.0 + 0.01 * (double)note - 5.0 * *p(p_envelope_release)));
   } else {
@@ -153,11 +158,8 @@ void mdaEPianoVoice::off(unsigned char velocity) {
   m_key = SUSTAIN;
 }
 
-bool mdaEPianoVoice::is_sustained() { return (note == SUSTAIN); }
-unsigned char mdaEPianoVoice::get_key() const { return m_key; }
-
 // generates the sound for this voice
-void mdaEPianoVoice::render(uint32_t from, uint32_t to) 
+void mdaEPianoVoice::render(uint32_t from, uint32_t to)
 {
   // abort if no key is pressed
   // initially m_key is INVALID_KEY, so no sound will be rendered

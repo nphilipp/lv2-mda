@@ -138,7 +138,7 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
     case 0x80: //note off
       for (unsigned i = 0; i < NVOICES; ++i) {
         if (voices[i]->get_key() == data[1]) {
-          voices[i]->off(data[2]);
+          voices[i]->release(data[2]);
           break;
         }
       }
@@ -198,23 +198,18 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
             voices[i]->set_sustain(sustain);
             //if pedal was released: dampen sustained notes
             if((sustain==0) && (voices[i]->is_sustained()))
-              voices[i]->off(0);
+              voices[i]->release(0);
           }
           break;
 
         //all sound off
         case 0x78:
-          for(short v=0; v<NVOICES; v++)
-            voices[v]->off(0);
         //all notes off
         case 0x7b:
           for(short v=0; v<NVOICES; v++)
-          {
-            voices[v]->set_dec(0.99f);
-            voices[v]->set_sustain(0);
-            voices[v]->set_muff(160.0f);
-          }
+            voices[v]->reset();
           break;
+
         default: break;
       }
       break;

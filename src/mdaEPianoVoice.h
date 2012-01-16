@@ -50,16 +50,15 @@ class mdaEPianoVoice : public LV2::Voice {
     mdaEPianoVoice(double, short*, KGRP*);
     void set_sustain(unsigned short v) { sustain = v; }
     void set_volume(float v) { volume = v; }
-    void set_dec(float v) { dec = v; }
-    void set_muff(float v) { muff = v; }
     void set_lmod(float v) { lmod = v; }
     void set_rmod(float v) { rmod = v; }
 
     void update(void); // recalculates internal variables
     void on(unsigned char key, unsigned char velocity);
-    void off(unsigned char velocity);
-    bool is_sustained(void);
-    unsigned char get_key(void) const;
+    void release(unsigned char velocity);
+    void reset(void);
+    bool is_sustained(void) { return (note == SUSTAIN); }
+    unsigned char get_key(void) const { return m_key; }
 
     // generates the sound for this voice
     void render(uint32_t from, uint32_t to);
