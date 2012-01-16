@@ -124,9 +124,8 @@ void mdaEPianoVoice::on(unsigned char key, unsigned char velocity)
     note = key; // note->pan
     if(key <  12) key = 12;
     if(key > 108) key = 108;
-    l = volume;
-    outr = l + l * width * (float)(key - 60);
-    outl = l + l - outr;
+    outr = volume + volume * width * (float)(key - 60);
+    outl = volume + volume - outr;
 
     if(key < 44) key = 44; // limit max decay length
     dec = (float)exp(-iFs * exp(-1.0 + 0.03 * (double)key - 2.0f * *p(p_envelope_decay)));
