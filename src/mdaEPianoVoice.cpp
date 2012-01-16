@@ -1,5 +1,4 @@
 #include "mdaEPianoVoice.h"
-#include <iostream>
 
 mdaEPianoVoice::mdaEPianoVoice(double rate, short * samples, KGRP * master_kgrp)
 {

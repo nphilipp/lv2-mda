@@ -15,7 +15,6 @@
 
 #include "mdaEPianoCommon.h"
 #include "mdaEPiano.h"
-#include <iostream>
 #include <cstdlib> //for exit
 
 #define STRING_BUF 2048
