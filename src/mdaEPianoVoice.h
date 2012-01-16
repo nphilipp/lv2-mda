@@ -48,12 +48,12 @@ class mdaEPianoVoice : public LV2::Voice {
 
   public:
     mdaEPianoVoice(double, short*, KGRP*);
-    void set_sustain(unsigned short v);
-    void set_volume(float v);
-    void set_dec(float v);
-    void set_muff(float v);
-    void set_lmod(float v);
-    void set_rmod(float v);
+    void set_sustain(unsigned short v) { sustain = v; }
+    void set_volume(float v) { volume = v; }
+    void set_dec(float v) { dec = v; }
+    void set_muff(float v) { muff = v; }
+    void set_lmod(float v) { lmod = v; }
+    void set_rmod(float v) { rmod = v; }
 
     void update(void); // recalculates internal variables
     void on(unsigned char key, unsigned char velocity);

@@ -61,14 +61,6 @@ mdaEPianoVoice::mdaEPianoVoice(double rate, short * samples, KGRP * master_kgrp)
   overdrive = 1.8f * default_preset[overdrive_param];
 }
 
-// set functions
-void mdaEPianoVoice::set_sustain(unsigned short v) { sustain = v; }
-void mdaEPianoVoice::set_volume(float v) { volume = v; }
-void mdaEPianoVoice::set_dec(float v) { dec = v; }
-void mdaEPianoVoice::set_muff(float v) { muff = v; }
-void mdaEPianoVoice::set_lmod(float v) { lmod = v; }
-void mdaEPianoVoice::set_rmod(float v) { rmod = v; }
-
 void mdaEPianoVoice::update()
 {
   size = (long)(12.0f * *p(p_hardness) - 6.0f);
