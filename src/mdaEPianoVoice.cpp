@@ -9,8 +9,6 @@ mdaEPianoVoice::mdaEPianoVoice(double rate, short * samples, KGRP * master_kgrp)
   waves = samples;
   kgrp  = master_kgrp;
 
-  // TODO: this is bad. Should get this from the mdaEPiano class
-  // default preset
   default_preset[p_envelope_decay]       = 0.500f;
   default_preset[p_envelope_release]     = 0.500f;
   default_preset[p_hardness]             = 0.500f;
