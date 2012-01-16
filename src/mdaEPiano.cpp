@@ -135,12 +135,10 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
   switch(data[0] & 0xf0)
   {
     case 0x80: //note off
-      {
-        for (unsigned i = 0; i < NVOICES; ++i) {
-          if (voices[i]->get_key() == data[1]) {
-            voices[i]->off(data[2]);
-            break;
-          }
+      for (unsigned i = 0; i < NVOICES; ++i) {
+        if (voices[i]->get_key() == data[1]) {
+          voices[i]->off(data[2]);
+          break;
         }
       }
       break;
@@ -150,16 +148,15 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
         unsigned int v = find_free_voice(data[1], data[2]);
         if (v < NVOICES)
           voices[v]->on(data[1], data[2]);
+        break;
       }
-      break;
 
-    case 0xE0: //TODO: pitch bend
-      break;
+    case 0xE0: break; //TODO: pitch bend
 
     //controller
     case 0xB0:
-      //WIP: control preset parameters with assigned controllers
       {
+        //WIP: control preset parameters with assigned controllers
         signed char param_id = -1;
         param_id = get_param_id_from_controller(data[1]);
         float new_value = scale_midi_to_f(data[2]);
@@ -194,24 +191,20 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
         case 0x40:
         //sostenuto pedal
         case 0x42:
-          {
-            sustain = data[2] & 0x40;
+          sustain = data[2] & 0x40;
 
-            for (unsigned i = 0; i < NVOICES; ++i) {
-              voices[i]->set_sustain(sustain);
-              //if pedal was released: dampen sustained notes
-              if((sustain==0) && (voices[i]->is_sustained()))
-                voices[i]->off(0);
-            }
+          for (unsigned i = 0; i < NVOICES; ++i) {
+            voices[i]->set_sustain(sustain);
+            //if pedal was released: dampen sustained notes
+            if((sustain==0) && (voices[i]->is_sustained()))
+              voices[i]->off(0);
           }
           break;
 
         //all sound off
         case 0x78:
           for(short v=0; v<NVOICES; v++)
-          {
             voices[v]->off(0);
-          }
         //all notes off
         case 0x7b:
           for(short v=0; v<NVOICES; v++)
