@@ -25,12 +25,10 @@ mdaEPiano::mdaEPiano(double rate)
   : LV2::Synth<mdaEPianoVoice, mdaEPiano>(p_n_ports, p_midi) {
 
   //license notice
-  std::cout << std::endl;
-  std::cout << "lv2-mdaEPiano v.0.0.1, Copyright (c) 2010 Ricardo Wurmus" << std::endl;
-  std::cout << "    port of mdaEPiano, Copyright (c) 2008 Paul Kellett" << std::endl;
-  std::cout << "This is free software, and you are welcome to redistribute it" << std::endl;
-  std::cout << "under certain conditions; see LICENSE file for details." << std::endl;
-  std::cout << std::endl;
+  printf("\nlv2-mdaEPiano v.0.0.1, Copyright (c) 2010 Ricardo Wurmus\n"
+         "    port of mdaEPiano, Copyright (c) 2008 Paul Kellett\n"
+         "This is free software, and you are welcome to redistribute it\n"
+         "under certain conditions; see LICENSE file for details.\n\n");
 
   //init global variables
   sustain = 0;
