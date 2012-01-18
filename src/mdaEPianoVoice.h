@@ -7,18 +7,16 @@
 #pragma GCC system_header
 #include <lv2synth.hpp>
 
-enum Param {
-  Default,
-  Current
-};
-
 class mdaEPianoVoice : public LV2::Voice {
   private:
     float Fs, iFs;
 
-    /// global internal variables
+    // pointers to master data
     KGRP  *kgrp;
+    float *params;
     short *waves;
+
+    // global internal variables
     short sustain;
     float width;
     long size;
@@ -46,20 +44,18 @@ class mdaEPianoVoice : public LV2::Voice {
     unsigned short note; // remember what note triggered this
     //end --- from VOICE
 
-    float default_preset[NPARAMS]; // contains the default preset
-
   protected:
     unsigned char m_key;
 
   public:
-    mdaEPianoVoice(double, short*, KGRP*);
+    mdaEPianoVoice(double, short*, KGRP*, float*);
     void set_sustain(unsigned short v) { sustain = v; }
     void set_volume(float v) { volume = v; }
     void set_lmod(float v) { lmod = v; }
     void set_rmod(float v) { rmod = v; }
 
-    float p_helper(unsigned short, Param);
-    void update(Param); // recalculates internal variables
+    void init(void);
+    void update(unsigned char); // recalculates internal variables
     void on(unsigned char key, unsigned char velocity);
     void release(unsigned char velocity);
     void reset(void);

@@ -32,40 +32,30 @@ mdaEPiano::mdaEPiano(double rate)
   //init global variables
   sustain = 0;
 
-  // set up default controllers
-  controllers[p_envelope_decay]       = 0x49;
-  controllers[p_envelope_release]     = 0x24;
-  controllers[p_hardness]             = 0x25;
-  controllers[p_treble_boost]         = 0x48;
-  controllers[p_modulation]           = 0x26;
-  controllers[p_lfo_rate]             = 0x27;
-  controllers[p_velocity_sensitivity] = 0x28;
-  controllers[p_stereo_width]         = 0x29;
-  controllers[p_polyphony]            = 0x4A;
-  controllers[p_fine_tuning]          = 0x2A;
-  controllers[p_random_tuning]        = 0x2B;
-  controllers[p_overdrive]            = 0x08;
-
   load_kgrp(kgrp);
   load_samples(&samples);
   tweak_samples();
 
+  // initialise parameters
+  params[p_offset(p_envelope_decay)]       = 0.500f;
+  params[p_offset(p_envelope_release)]     = 0.500f;
+  params[p_offset(p_hardness)]             = 0.500f;
+  params[p_offset(p_treble_boost)]         = 0.500f;
+  params[p_offset(p_modulation)]           = 0.500f;
+  params[p_offset(p_lfo_rate)]             = 0.650f;
+  params[p_offset(p_velocity_sensitivity)] = 0.250f;
+  params[p_offset(p_stereo_width)]         = 0.500f;
+  params[p_offset(p_polyphony)]            = 0.500f;
+  params[p_offset(p_fine_tuning)]          = 0.500f;
+  params[p_offset(p_random_tuning)]        = 0.146f;
+  params[p_offset(p_overdrive)]            = 0.000f;
+
   for(uint32_t i=0; i<NVOICES; ++i) {
-    voices[i] = new mdaEPianoVoice(rate, samples, kgrp);
+    voices[i] = new mdaEPianoVoice(rate, samples, kgrp, params);
     add_voices(voices[i]);
   }
 
   add_audio_outputs(p_left, p_right);
-}
-
-signed char mdaEPiano::get_param_id_from_controller(unsigned char cc)
-{
-  for(unsigned char i=0; i<NPARAMS; ++i)
-  {
-    if (cc == controllers[i])
-      return i;
-  }
-  return -1;
 }
 
 unsigned mdaEPiano::find_free_voice(unsigned char key, unsigned char velocity) {
@@ -102,22 +92,17 @@ void mdaEPiano::setVolume(float value)
     voices[v]->set_volume(value);
 }
 
-void mdaEPiano::setParameter(unsigned char id, float value)
-{
-  if(id>=NPARAMS)
-    return;
-  *p(id) = value;
-  update();
-#ifdef DEBUG
-  printf("changed %i to %f\n", id, value);
-#endif
-}
-
-void mdaEPiano::update() //parameter change
+//TODO: implement run()
+//TODO: check if input params have changed; then update
+//void run() {
+  //update();
+//TODO
+/*void mdaEPiano::update()
 {
   for (uint32_t v=0; v<NVOICES; ++v)
-    voices[v]->update(Current);
+    voices[v]->update(params);
 }
+*/
 
 void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 #ifdef DEBUG
@@ -152,14 +137,6 @@ void mdaEPiano::handle_midi(uint32_t size, unsigned char* data) {
 
     //controller
     case 0xB0:
-      {
-        //WIP: control preset parameters with assigned controllers
-        signed char param_id = -1;
-        param_id = get_param_id_from_controller(data[1]);
-        float new_value = scale_midi_to_f(data[2]);
-        if(param_id >= 0) setParameter(param_id, new_value);
-      }
-
       // standard controller stuff
       switch(data[1])
       {

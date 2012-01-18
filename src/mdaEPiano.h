@@ -9,10 +9,8 @@
 #include <lv2synth.hpp>
 
 class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
-  private:
-    // controller mapping
-    unsigned char controllers[NPARAMS];
   public:
+    float params[NPARAMS];
     bool sustain;
     float modwhl;
     short *samples;
@@ -28,14 +26,10 @@ class mdaEPiano : public LV2::Synth<mdaEPianoVoice, mdaEPiano> {
     void load_kgrp(KGRP*);
     void load_samples(short**);
     void tweak_samples(void);
+    void update(void);
 
-    signed char get_param_id_from_controller(unsigned char cc);
     unsigned find_free_voice(unsigned char key, unsigned char velocity);
     void handle_midi(uint32_t size, unsigned char* data);
     void setVolume(float value);
-    void setParameter(unsigned char id, float value);
-
-    // parameter change
-    void update(void);
 };
 #endif
