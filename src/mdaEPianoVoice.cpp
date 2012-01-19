@@ -9,18 +9,18 @@ mdaEPianoVoice::mdaEPianoVoice(double rate, short * samples, KGRP * master_kgrp)
   waves = samples;
   kgrp  = master_kgrp;
 
-  default_preset[p_envelope_decay]       = 0.500f;
-  default_preset[p_envelope_release]     = 0.500f;
-  default_preset[p_hardness]             = 0.500f;
-  default_preset[p_treble_boost]         = 0.500f;
-  default_preset[p_modulation]           = 0.500f;
-  default_preset[p_lfo_rate]             = 0.650f;
-  default_preset[p_velocity_sensitivity] = 0.250f;
-  default_preset[p_stereo_width]         = 0.500f;
-  default_preset[p_polyphony]            = 0.500f;
-  default_preset[p_fine_tuning]          = 0.500f;
-  default_preset[p_random_tuning]        = 0.146f;
-  default_preset[p_overdrive]            = 0.000f;
+  default_preset[p_offset(p_envelope_decay)]       = 0.500f;
+  default_preset[p_offset(p_envelope_release)]     = 0.500f;
+  default_preset[p_offset(p_hardness)]             = 0.500f;
+  default_preset[p_offset(p_treble_boost)]         = 0.500f;
+  default_preset[p_offset(p_modulation)]           = 0.500f;
+  default_preset[p_offset(p_lfo_rate)]             = 0.650f;
+  default_preset[p_offset(p_velocity_sensitivity)] = 0.250f;
+  default_preset[p_offset(p_stereo_width)]         = 0.500f;
+  default_preset[p_offset(p_polyphony)]            = 0.500f;
+  default_preset[p_offset(p_fine_tuning)]          = 0.500f;
+  default_preset[p_offset(p_random_tuning)]        = 0.146f;
+  default_preset[p_offset(p_overdrive)]            = 0.000f;
 
   reset();
   volume = 0.2f;
@@ -30,7 +30,7 @@ mdaEPianoVoice::mdaEPianoVoice(double rate, short * samples, KGRP * master_kgrp)
 float mdaEPianoVoice::p_helper(unsigned short id, Param d)
 {
   if (d == Default)
-    return default_preset[id];
+    return default_preset[p_offset(id)];
   else
     return *p(id);
 }

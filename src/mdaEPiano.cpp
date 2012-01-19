@@ -33,18 +33,18 @@ mdaEPiano::mdaEPiano(double rate)
   sustain = 0;
 
   // set up default controllers
-  controllers[p_envelope_decay]       = 0x49;
-  controllers[p_envelope_release]     = 0x24;
-  controllers[p_hardness]             = 0x25;
-  controllers[p_treble_boost]         = 0x48;
-  controllers[p_modulation]           = 0x26;
-  controllers[p_lfo_rate]             = 0x27;
-  controllers[p_velocity_sensitivity] = 0x28;
-  controllers[p_stereo_width]         = 0x29;
-  controllers[p_polyphony]            = 0x4A;
-  controllers[p_fine_tuning]          = 0x2A;
-  controllers[p_random_tuning]        = 0x2B;
-  controllers[p_overdrive]            = 0x08;
+  controllers[p_offset(p_envelope_decay)]       = 0x49;
+  controllers[p_offset(p_envelope_release)]     = 0x24;
+  controllers[p_offset(p_hardness)]             = 0x25;
+  controllers[p_offset(p_treble_boost)]         = 0x48;
+  controllers[p_offset(p_modulation)]           = 0x26;
+  controllers[p_offset(p_lfo_rate)]             = 0x27;
+  controllers[p_offset(p_velocity_sensitivity)] = 0x28;
+  controllers[p_offset(p_stereo_width)]         = 0x29;
+  controllers[p_offset(p_polyphony)]            = 0x4A;
+  controllers[p_offset(p_fine_tuning)]          = 0x2A;
+  controllers[p_offset(p_random_tuning)]        = 0x2B;
+  controllers[p_offset(p_overdrive)]            = 0x08;
 
   load_kgrp(kgrp);
   load_samples(&samples);
@@ -106,7 +106,7 @@ void mdaEPiano::setParameter(unsigned char id, float value)
 {
   if(id>=NPARAMS)
     return;
-  *p(id) = value;
+  *p(id+PARAM_OFFSET) = value;
   update();
 #ifdef DEBUG
   printf("changed %i to %f\n", id, value);
